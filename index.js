@@ -1,10 +1,10 @@
 require("dotenv").config();
 
-const DatabaseStrategyFactory = require("./Factory");
-const StockItemRepository = require('./repositories/StockItemRepository');
-const LoggingRepositoryDecorator = require('./decorators/LoggingRepositoryDecorator');
+const DatabaseStrategyFactory = require("./src/Factory");
+const StockItemRepository = require('./src/repositories/StockItemRepository');
+const LoggingRepositoryDecorator = require('./src/decorators/LoggingRepositoryDecorator');
 
-const { updateStockItemConcurrently } = require('./services/stockItemService');
+const { updateStockItemConcurrently } = require('./src/services/stockItemService');
 
 
 const strategyType = process.env.DATABASE_STRATEGY || "pool";
