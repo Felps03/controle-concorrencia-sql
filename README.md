@@ -10,11 +10,11 @@ Para mitigar o problema de condições de corrida em transações concorrentes, 
 
 ## Detalhes da Implementação
 
-A solução envolve três funções-chave: `read`, `updateStockItem` e `purchase`, orquestradas por uma função `main` que simula múltiplas operações de compra concorrentes.
+A solução envolve três funções-chave: `readStockItem`, `updateStockItem` e `purchase`, orquestradas por uma função `main` que simula múltiplas operações de compra concorrentes.
 
 ### Leitura do Item de Estoque
 
-A função `read` busca de forma assíncrona um item de estoque único no banco de dados baseado em seu ID. Ela seleciona campos específicos: `id`, `amount` e `version`.
+A função `readStockItem` busca de forma assíncrona um item de estoque único no banco de dados baseado em seu ID. Ela seleciona campos específicos: `id`, `amount` e `version`.
 
 ### Atualização do Item de Estoque
 

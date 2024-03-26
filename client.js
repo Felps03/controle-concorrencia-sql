@@ -1,5 +1,10 @@
-const { PrismaClient } = require('@prisma/client')
+const { Pool } = require("pg");
+const pool = new Pool({
+  user: "postgres",
+  host: "localhost",
+  database: "transactions",
+  password: "postgres",
+  port: 5432,
+});
 
-let prisma = new PrismaClient()
-
-module.exports = prisma
+module.exports = pool;

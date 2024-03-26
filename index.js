@@ -1,54 +1,60 @@
-const prisma = require("./client");
+const pool = require('./client');
 
-const read = async () => {
-  const stock = await prisma.stock.findUnique({
-    where: {id: "f92ef45b-a729-4938-b580-03d939a80301"},
-    select: { id: true, amount: true, version: true },
-  });
-
-  return stock;
-};
-
-
-const updateStockItem = async (id, version) => {
+const query = async (sql, params) => {
+  const client = await pool.connect();
   try {
-    await prisma.stock.update({
-      where: {
-        id,
-        version,
-      },
-      data: {
-        amount: { decrement: 1 },
-        version: { increment: 1 },
-      },
-    });
-  } catch (error) {
-    if (error.message.includes("Record to update not found")) {
-      console.log("Tentativa de compra ignorada devido a condição de corrida");
-    } else {
-      throw error;
-    }
+    const res = await client.query(sql, params);
+    return res.rows;
+  } catch (e) {
+    console.error("Erro na operação de banco de dados:", e.message);
+    throw e;
+  } finally {
+    client.release();
   }
 };
 
-const purchase = async () => {
-  const stockItem = await read();
-
-  if (!stockItem || stockItem.amount <= 0) return;
-
-  await updateStockItem(stockItem.id, stockItem.version);
+const readStockItem = async (id) => {
+  const rows = await query('SELECT id, amount, version FROM stocks WHERE id = $1', [id]);
+  return rows[0];
 };
 
+const updateStockItem = async (id, version) => {
+  const result = await query(
+    'UPDATE stocks SET amount = amount - 1, version = version + 1 WHERE id = $1 AND version = $2 RETURNING *',
+    [id, version]
+  );
+  return result.length > 0;
+};
+
+const purchase = async (id) => {
+  const stockItem = await readStockItem(id);
+
+  if (!stockItem || stockItem.amount <= 0) {
+    console.log("Compra falhou: estoque insuficiente.");
+    return;
+  }
+
+  const success = await updateStockItem(stockItem.id, stockItem.version);
+  if (!success) {
+    console.log("Compra falhou: erro de concorrência.");
+    return;
+  }
+
+  console.log("Compra bem-sucedida.");
+};
 
 const main = async () => {
-  const purchases = Array.from({ length: 100 }, () => purchase());
-  await Promise.all(purchases);
+  try {
+    const id = "f92ef45b-a729-4938-b580-03d939a80301";
 
-  const finalStockItem = await read();
+    const purchases = Array.from({ length: 100 }, () => () => purchase(id));
+    await Promise.all(purchases.map(func => func()));
 
-  console.log("Resultado final do estoque:", finalStockItem);
+    const finalStockItem = await readStockItem(id);
+    console.log("Resultado final do estoque:", finalStockItem);
+  } catch (e) {
+    console.error("Erro durante a execução do script:", e);
+  }
 };
 
-main().catch(e => {
-  console.error("Erro durante a execução do script:", e);
-});
+main();

@@ -5,19 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node prisma/seed.js",
-    "prisma:migrate:dev": "npx prisma migrate dev",
-    "prisma:format": "npx prisma format",
-    "prisma:introspect": "npx prisma introspect",
-    "prisma:studio": "npx prisma studio"
+    "seed": "node seed.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.11.0"
-  },
-  "devDependencies": {
-    "prisma": "^5.11.0"
+    "pg": "^8.11.3"
   }
 }
