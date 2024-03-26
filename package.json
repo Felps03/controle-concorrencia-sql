@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node prisma/seed.js",
+    "start": "node index",
+    "seed:prisma": "node prisma/seed.js",
     "prisma:migrate:dev": "npx prisma migrate dev",
     "prisma:format": "npx prisma format",
     "prisma:introspect": "npx prisma introspect",
