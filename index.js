@@ -1,54 +1,32 @@
-const prisma = require("./client");
+require("dotenv").config();
 
-const read = async () => {
-  const stock = await prisma.stock.findUnique({
-    where: {id: "f92ef45b-a729-4938-b580-03d939a80301"},
-    select: { id: true, amount: true, version: true },
-  });
+const DatabaseStrategyFactory = require("./Factory");
+const StockItemRepository = require('./repositories/StockItemRepository');
+const LoggingRepositoryDecorator = require('./decorators/LoggingRepositoryDecorator');
 
-  return stock;
-};
+const { updateStockItemConcurrently } = require('./services/stockItemService');
 
 
-const updateStockItem = async (id, version) => {
-  try {
-    await prisma.stock.update({
-      where: {
-        id,
-        version,
-      },
-      data: {
-        amount: { decrement: 1 },
-        version: { increment: 1 },
-      },
-    });
-  } catch (error) {
-    if (error.message.includes("Record to update not found")) {
-      console.log("Tentativa de compra ignorada devido a condição de corrida");
-    } else {
-      throw error;
-    }
-  }
-};
+const strategyType = process.env.DATABASE_STRATEGY || "pool";
 
-const purchase = async () => {
-  const stockItem = await read();
+const databaseStrategy = DatabaseStrategyFactory.create(strategyType);
 
-  if (!stockItem || stockItem.amount <= 0) return;
-
-  await updateStockItem(stockItem.id, stockItem.version);
-};
-
+const stockItemRepository = new StockItemRepository(databaseStrategy);
+const decoratedRepository  = new LoggingRepositoryDecorator(stockItemRepository);
 
 const main = async () => {
-  const purchases = Array.from({ length: 100 }, () => purchase());
-  await Promise.all(purchases);
+    const id = "f92ef45b-a729-4938-b580-03d939a80301";
+  
+    try {
 
-  const finalStockItem = await read();
+        await Promise.all(Array.from({ length: 100 }, () => updateStockItemConcurrently(id, decoratedRepository)));
+        const finalStockItem = await decoratedRepository.findStockItemById(id);
+        console.log("Resultado final do estoque:", finalStockItem);
 
-  console.log("Resultado final do estoque:", finalStockItem);
-};
+      
+    } catch (error) {
+      console.error("Erro durante a execução do script:", error);
+    }
+  }
 
-main().catch(e => {
-  console.error("Erro durante a execução do script:", e);
-});
+  main().catch(console.error);
