@@ -84,9 +84,10 @@ Pré-requisitos: Node.js 24 LTS (ver [`.nvmrc`](.nvmrc) — `nvm use`), Docker (
 npm install
 cp .env.example .env          # ajuste DATABASE_URL se necessário
 docker compose up -d          # sobe o Postgres em localhost:5432
-npx prisma migrate deploy     # aplica as migrations
 npm run seed:prisma           # cria o item de estoque inicial (amount: 10)
 ```
+
+> `npm start`, `npm run dev`, `npm test` e `npm run seed:prisma` aplicam as migrations pendentes automaticamente antes de rodar (via os hooks `prestart`/`predev`/`pretest`/`preseed:prisma` do npm — `npx prisma migrate deploy` é idempotente, não recria nada se já estiver tudo aplicado). Por isso o erro "a tabela `stocks` não existe" não deveria mais acontecer, mesmo recriando o container do Postgres do zero.
 
 Variáveis de ambiente disponíveis (ver `[.env.example](.env.example)`):
 
@@ -136,6 +137,8 @@ O teste de concorrência (`test/integration/concurrency.test.js`) dispara 100, 5
 
 - o estoque nunca fica negativo;
 - o número de compras bem-sucedidas é exatamente igual ao estoque inicial.
+
+`test/integration/stockPurchaseFlow.gwt.test.js` cobre o fluxo de compra (`stockItemService`) no estilo **Dado/Quando/Então** (Given/When/Then), incluindo dois cenários de conflito de versão simulados deterministicamente (sem depender de timing real): um conflito único que se recupera no retry, e conflitos persistentes que esgotam as tentativas e lançam `VersionConflictError`.
 
 ## Trocando de Strategy (pool vs prisma)
 

@@ -39,6 +39,4 @@ jobs:
 
       - run: npm run lint
 
-      - run: npx prisma migrate deploy
-
       - run: npm test

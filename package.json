@@ -7,11 +7,16 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "pretest": "npx prisma migrate deploy",
+    "pretest:integration": "npx prisma migrate deploy",
     "test": "node --env-file-if-exists=.env --test \"test/**/*.test.js\"",
     "test:unit": "node --test \"test/unit/**/*.test.js\"",
     "test:integration": "node --env-file-if-exists=.env --test \"test/integration/**/*.test.js\"",
+    "prestart": "npx prisma migrate deploy",
     "start": "node --env-file-if-exists=.env index.js",
+    "predev": "npx prisma migrate deploy",
     "dev": "node --env-file-if-exists=.env --watch index.js",
+    "preseed:prisma": "npx prisma migrate deploy",
     "seed:prisma": "node --env-file-if-exists=.env prisma/seed.js",
     "prisma:migrate:dev": "npx prisma migrate dev",
     "prisma:format": "npx prisma format",
