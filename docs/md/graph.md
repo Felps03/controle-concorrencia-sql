@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     SistemaDeGerenciamentoDeEstoque(Sistema de Gerenciamento de Estoque)
     PontoDeEntrada(Ponto de Entrada: index.js) --> Configuração(Configuração de Banco de Dados)
@@ -12,9 +13,17 @@ graph TD
     Repositório --> LoggingDecoratorJS(LoggingRepositoryDecorator.js)
     PontoDeEntrada --> Serviço(Serviço de Gerenciamento de Itens de Estoque)
     Serviço --> StockItemServiceJS(stockItemService.js)
+    StockItemServiceJS --> ErrosDeDomínio(Erros de Domínio)
+    ErrosDeDomínio --> InsufficientStockErrorJS(InsufficientStockError.js)
+    ErrosDeDomínio --> VersionConflictErrorJS(VersionConflictError.js)
+    LoggingDecoratorJS --> LoggerJS(logger.js)
+    PoolStrategyJS --> LoggerJS
+    PrismaStrategyJS --> LoggerJS
     SistemaDeGerenciamentoDeEstoque --> Operações
     Operações --> Verificação(Verificação de disponibilidade)
-    Operações --> Atualização(Atualização de estoque)
+    Operações --> Atualização(Atualização de estoque com retry)
 
     style SistemaDeGerenciamentoDeEstoque fill:#f9f,stroke:#333
     style Operações fill:#bbf,stroke:#333
+    style ErrosDeDomínio fill:#fbb,stroke:#333
+```
