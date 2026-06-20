@@ -13,6 +13,9 @@ yarn-error.log*
 # Diretório de saída de compilação
 /dist
 
+# Prisma Client gerado (npx prisma generate recria isso)
+/src/generated/
+
 # Outros arquivos e diretórios que podem conter informações sensíveis ou não devem ser compartilhados
 /.cache
 /.vscode

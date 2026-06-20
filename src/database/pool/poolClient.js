@@ -1,4 +1,4 @@
-const { Pool } = require("pg");
+import { Pool } from "pg";
 
 class PoolSingleton {
   constructor() {
@@ -11,4 +11,4 @@ class PoolSingleton {
   }
 }
 
-module.exports = new PoolSingleton();
+export default new PoolSingleton();

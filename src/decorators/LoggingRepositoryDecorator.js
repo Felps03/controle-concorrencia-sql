@@ -1,4 +1,4 @@
-const logger = require("../logger");
+import logger from "../logger.js";
 
 class LoggingRepositoryDecorator {
   constructor(repository) {
@@ -20,4 +20,4 @@ class LoggingRepositoryDecorator {
   }
 }
 
-module.exports = LoggingRepositoryDecorator;
+export default LoggingRepositoryDecorator;

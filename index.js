@@ -1,9 +1,9 @@
-const DatabaseStrategyFactory = require("./src/Factory");
-const StockItemRepository = require('./src/repositories/StockItemRepository');
-const LoggingRepositoryDecorator = require('./src/decorators/LoggingRepositoryDecorator');
+import DatabaseStrategyFactory from "./src/Factory.js";
+import StockItemRepository from "./src/repositories/StockItemRepository.js";
+import LoggingRepositoryDecorator from "./src/decorators/LoggingRepositoryDecorator.js";
 
-const { updateStockItemConcurrently } = require('./src/services/stockItemService');
-const logger = require('./src/logger');
+import { updateStockItemConcurrently } from "./src/services/stockItemService.js";
+import logger from "./src/logger.js";
 
 
 const strategyType = process.env.DATABASE_STRATEGY || "pool";
@@ -33,8 +33,12 @@ const main = async () => {
 
   main()
     .catch((error) => logger.error({ err: error }, "Erro durante a execucao do script"))
-    .finally(() => {
+    .finally(async () => {
       if (strategyType === "pool") {
-        require("./src/database/pool/poolClient").end();
+        const { default: poolClient } = await import("./src/database/pool/poolClient.js");
+        await poolClient.end();
+      } else if (strategyType === "prisma") {
+        const { default: prisma } = await import("./src/database/prisma/prismaClient.js");
+        await prisma.$disconnect();
       }
     });

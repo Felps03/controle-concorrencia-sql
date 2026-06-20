@@ -1,15 +1,14 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const crypto = require("node:crypto");
+import test from "node:test";
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
 
-const { PrismaClient } = require("@prisma/client");
-const { PoolStrategy } = require("../../src/strategies/PoolStrategy");
-const { PrismaStrategy } = require("../../src/strategies/PrismaStrategy");
-const poolClient = require("../../src/database/pool/poolClient");
+import prisma from "../../src/database/prisma/prismaClient.js";
+import { PoolStrategy } from "../../src/strategies/PoolStrategy.js";
+import { PrismaStrategy } from "../../src/strategies/PrismaStrategy.js";
+import poolClient from "../../src/database/pool/poolClient.js";
 
 // Requer um Postgres acessivel via DATABASE_URL com as migrations aplicadas
 // (ver README: docker compose up -d && npx prisma migrate deploy).
-const prisma = new PrismaClient();
 const createdIds = [];
 
 const seedStock = async (id, amount, version = 0) => {

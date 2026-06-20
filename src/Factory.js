@@ -1,12 +1,12 @@
-const { PoolStrategy } = require('./strategies/PoolStrategy');
-const { PrismaStrategy } = require('./strategies/PrismaStrategy');
+import { PoolStrategy } from "./strategies/PoolStrategy.js";
+import { PrismaStrategy } from "./strategies/PrismaStrategy.js";
 
 class DatabaseStrategyFactory {
   static strategies = {
     pool: PoolStrategy,
     prisma: PrismaStrategy,
   };
-  
+
   static create(strategyType) {
     const Strategy = this.strategies[strategyType];
     if (!Strategy) {
@@ -16,4 +16,4 @@ class DatabaseStrategyFactory {
   }
 }
 
-module.exports = DatabaseStrategyFactory;
+export default DatabaseStrategyFactory;

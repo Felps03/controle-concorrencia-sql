@@ -20,8 +20,10 @@ const log = (level, fields, msg) => {
   write(JSON.stringify(line));
 };
 
-module.exports = {
+const logger = {
   debug: (fields, msg) => log("debug", fields, msg),
   info: (fields, msg) => log("info", fields, msg),
   error: (fields, msg) => log("error", fields, msg),
 };
+
+export default logger;

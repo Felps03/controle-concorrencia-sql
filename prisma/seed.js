@@ -1,6 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-
-let prisma = new PrismaClient();
+import prisma from "../src/database/prisma/prismaClient.js";
 
 // Permite simular diferentes cenarios (ex: estoque zerado, estoque baixo)
 // sem editar este arquivo: SEED_STOCK_ID, SEED_STOCK_AMOUNT, SEED_STOCK_VERSION.

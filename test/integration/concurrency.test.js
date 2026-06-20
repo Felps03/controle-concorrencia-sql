@@ -1,16 +1,15 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const crypto = require("node:crypto");
+import test from "node:test";
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
 
-const { PrismaClient } = require("@prisma/client");
-const { PoolStrategy } = require("../../src/strategies/PoolStrategy");
-const StockItemRepository = require("../../src/repositories/StockItemRepository");
-const { updateStockItemConcurrently } = require("../../src/services/stockItemService");
-const poolClient = require("../../src/database/pool/poolClient");
+import prisma from "../../src/database/prisma/prismaClient.js";
+import { PoolStrategy } from "../../src/strategies/PoolStrategy.js";
+import StockItemRepository from "../../src/repositories/StockItemRepository.js";
+import { updateStockItemConcurrently } from "../../src/services/stockItemService.js";
+import poolClient from "../../src/database/pool/poolClient.js";
 
 // Requer um Postgres acessivel via DATABASE_URL com as migrations aplicadas
 // (ver README: docker compose up -d && npx prisma migrate deploy).
-const prisma = new PrismaClient();
 const repository = new StockItemRepository(new PoolStrategy());
 const createdIds = [];
 

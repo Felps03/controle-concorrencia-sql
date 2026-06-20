@@ -64,13 +64,108 @@ index.js
 - **Decorator**: `LoggingRepositoryDecorator` adiciona logs de cada leitura/escrita sem alterar o repositório original.
 - **Service**: `stockItemService` orquestra a leitura, a tentativa de escrita otimista, o retry em caso de conflito e os erros de domínio (`InsufficientStockError`, `VersionConflictError`).
 
-Diagramas (gerados a partir do código, em `[docs/md](docs/md)`):
+### Diagrama de camadas
 
+```mermaid
+graph TD
+    SistemaDeGerenciamentoDeEstoque(Sistema de Gerenciamento de Estoque)
+    PontoDeEntrada(Ponto de Entrada: index.js) --> Configuração(Configuração de Banco de Dados)
+    Configuração --> FactoryJS(Factory.js)
+    FactoryJS --> Estratégias(Estratégias de Banco de Dados)
+    Estratégias --> PoolStrategyJS(PoolStrategy.js)
+    Estratégias --> PrismaStrategyJS(PrismaStrategy.js)
+    PoolStrategyJS --> PoolClientJS(poolClient.js)
+    PrismaStrategyJS --> PrismaClientJS(prismaClient.js)
+    PontoDeEntrada --> Repositório(Repositório de Itens de Estoque)
+    Repositório --> StockItemRepositoryJS(StockItemRepository.js)
+    Repositório --> LoggingDecoratorJS(LoggingRepositoryDecorator.js)
+    PontoDeEntrada --> Serviço(Serviço de Gerenciamento de Itens de Estoque)
+    Serviço --> StockItemServiceJS(stockItemService.js)
+    StockItemServiceJS --> ErrosDeDomínio(Erros de Domínio)
+    ErrosDeDomínio --> InsufficientStockErrorJS(InsufficientStockError.js)
+    ErrosDeDomínio --> VersionConflictErrorJS(VersionConflictError.js)
+    LoggingDecoratorJS --> LoggerJS(logger.js)
+    PoolStrategyJS --> LoggerJS
+    PrismaStrategyJS --> LoggerJS
+    SistemaDeGerenciamentoDeEstoque --> Operações
+    Operações --> Verificação(Verificação de disponibilidade)
+    Operações --> Atualização(Atualização de estoque com retry)
 
-| Sequência da compra                     | Fluxo de estados                   | Camadas                   |
-| --------------------------------------- | ---------------------------------- | ------------------------- |
-| [Sequência](docs/md/sequenceDiagram.md) | [Estados](docs/md/stateDiagram.md) | [Grafo](docs/md/graph.md) |
+    style SistemaDeGerenciamentoDeEstoque fill:#f9f,stroke:#333
+    style Operações fill:#bbf,stroke:#333
+    style ErrosDeDomínio fill:#fbb,stroke:#333
+```
 
+### Sequência da compra
+
+```mermaid
+sequenceDiagram
+    participant index as index.js
+    participant factory as DatabaseStrategyFactory
+    participant service as stockItemService
+    participant decorator as LoggingRepositoryDecorator
+    participant repository as StockItemRepository
+    participant strategy as IDatabaseStrategy (Pool/Prisma)
+    participant db as Postgres
+
+    index->>+factory: create(strategyType)
+    factory-->>-index: strategy instance
+    index->>service: updateStockItemConcurrently(id, decoratedRepository, { retries, backoffMs })
+
+    loop até esgotar "retries" tentativas
+        service->>+decorator: findStockItemById(id)
+        decorator->>+repository: findStockItemById(id)
+        repository->>+strategy: readStockItem(id)
+        strategy->>+db: SELECT amount, version
+        db-->>-strategy: stockItem
+        strategy-->>-repository: stockItem
+        repository-->>-decorator: stockItem
+        decorator-->>-service: stockItem (log debug)
+
+        alt estoque indisponível (amount <= 0)
+            service-->>index: throw InsufficientStockError
+        else estoque disponível
+            service->>+decorator: updateStockItem(id, stockItem.version)
+            decorator->>+repository: updateStockItem(id, version)
+            repository->>+strategy: updateStockItem(id, version)
+            strategy->>+db: UPDATE ... WHERE id = $1 AND version = $2
+            db-->>-strategy: linhas afetadas (0 ou 1)
+            strategy-->>-repository: success (boolean)
+            repository-->>-decorator: success
+            decorator-->>-service: success (log debug)
+
+            alt success = true
+                service-->>index: { status: "success", attempt }
+            else conflito de version (success = false)
+                Note over service: outra compra venceu a corrida -<br/>aguarda backoff e tenta novamente
+            end
+        end
+    end
+
+    service-->>index: throw VersionConflictError (após esgotar "retries")
+
+    Note over index,service: index dispara N compras concorrentes via Promise.allSettled<br/>e tabula sucesso / InsufficientStockError / VersionConflictError
+```
+
+### Fluxo de estados da compra
+
+```mermaid
+stateDiagram-v2
+    [*] --> LendoEstoque
+
+    LendoEstoque --> EstoqueIndisponivel: amount <= 0
+    LendoEstoque --> TentandoAtualizar: amount > 0
+
+    TentandoAtualizar --> CompraComSucesso: UPDATE afetou 1 linha (version corresponde)
+    TentandoAtualizar --> ConflitoDeVersao: UPDATE afetou 0 linhas (version mudou)
+
+    ConflitoDeVersao --> LendoEstoque: tentativas restantes > 0 (aguarda backoff)
+    ConflitoDeVersao --> RetriesEsgotados: tentativas restantes = 0
+
+    EstoqueIndisponivel --> [*]: InsufficientStockError
+    CompraComSucesso --> [*]: status = success
+    RetriesEsgotados --> [*]: VersionConflictError
+```
 
 Mais detalhes sobre os padrões de design usados: `[DesignPatternsGuide_DataAccessProject.md](DesignPatternsGuide_DataAccessProject.md)`.
 
@@ -78,7 +173,7 @@ Mais detalhes sobre os padrões de design usados: `[DesignPatternsGuide_DataAcce
 
 Pré-requisitos: Node.js 24 LTS (ver [`.nvmrc`](.nvmrc) — `nvm use`), Docker (para o Postgres).
 
-> O projeto usa quase só recursos nativos do Node: o test runner é o `node:test`, e as variáveis de ambiente são carregadas via flag nativa `--env-file-if-exists` (sem o pacote `dotenv`). As únicas dependências de runtime são `pg` e `@prisma/client` — não há driver Postgres nativo no Node, e o Prisma é uma das duas strategies comparadas pelo projeto.
+> O projeto é 100% ESM (`"type": "module"`) e usa quase só recursos nativos do Node: o test runner é o `node:test`, as variáveis de ambiente são carregadas via flag nativa `--env-file-if-exists` (sem o pacote `dotenv`), e o Node 24 faz *type-stripping* nativo de TypeScript — usado para importar o client do Prisma 7 (`src/generated/prisma/client.ts`) sem `ts-node`/`tsx`. As únicas dependências de runtime são `pg`, `@prisma/client` e `@prisma/adapter-pg` — não há driver Postgres nativo no Node, e o Prisma é uma das duas strategies comparadas pelo projeto. Desde o Prisma 7, o `PrismaClient` exige um *driver adapter*; por isso a `PrismaStrategy` também passa a rodar sobre `pg` por baixo dos panos — mantemos, ainda assim, pools de conexão independentes entre as duas strategies, para preservar a comparação ORM vs. driver cru.
 
 ```bash
 npm install

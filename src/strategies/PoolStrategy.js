@@ -1,9 +1,8 @@
-const poolClient  = require('../database/pool/poolClient'); // Supondo que
+import poolClient from "../database/pool/poolClient.js";
+import { IDatabaseStrategy } from "./IDatabaseStrategy.js";
+import logger from "../logger.js";
 
-const { IDatabaseStrategy } = require("./IDatabaseStrategy");
-const logger = require("../logger");
-
-class PoolStrategy extends IDatabaseStrategy {
+export class PoolStrategy extends IDatabaseStrategy {
 
   async query (sql, params) {
     const client = await poolClient.connect();
@@ -18,7 +17,7 @@ class PoolStrategy extends IDatabaseStrategy {
     }
   };
 
-  
+
   async readStockItem(id) {
     const res = await this.query('SELECT id, amount, version FROM stocks WHERE id = $1', [id]);
     return res[0];
@@ -32,5 +31,3 @@ class PoolStrategy extends IDatabaseStrategy {
     return result.length > 0;
   }
 }
-
-module.exports = { PoolStrategy };

@@ -1,9 +1,8 @@
-const prisma = require('../database/prisma/prismaClient');
+import prisma from "../database/prisma/prismaClient.js";
+import { IDatabaseStrategy } from "./IDatabaseStrategy.js";
+import logger from "../logger.js";
 
-const { IDatabaseStrategy } = require("./IDatabaseStrategy");
-const logger = require("../logger");
-
-class PrismaStrategy extends IDatabaseStrategy {
+export class PrismaStrategy extends IDatabaseStrategy {
   async readStockItem(id) {
     return await prisma.stock.findUnique({
       where: { id },
@@ -19,7 +18,9 @@ class PrismaStrategy extends IDatabaseStrategy {
       });
       return true;
     } catch (error) {
-      if (error.message.includes("Record to update not found")) {
+      // P2025 = "Record not found" - codigo de erro estavel do Prisma,
+      // ao contrario do texto da mensagem (que mudou entre majors).
+      if (error.code === "P2025") {
         logger.debug({ id, version }, "Tentativa de compra ignorada devido a conflito de versao");
         return false;
       } else {
@@ -28,6 +29,3 @@ class PrismaStrategy extends IDatabaseStrategy {
     }
   }
 }
-
-
-module.exports = { PrismaStrategy };

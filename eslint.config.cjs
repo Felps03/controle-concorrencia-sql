@@ -10,19 +10,25 @@ module.exports = [
     },
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: "commonjs",
+      sourceType: "module",
       globals: {
-        require: "readonly",
-        module: "writable",
-        exports: "writable",
         process: "readonly",
         console: "readonly",
-        __dirname: "readonly",
         setTimeout: "readonly",
       },
     },
   },
   {
-    ignores: ["node_modules/", "generated/"],
+    files: ["eslint.config.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        require: "readonly",
+        module: "writable",
+      },
+    },
+  },
+  {
+    ignores: ["node_modules/", "src/generated/"],
   },
 ];

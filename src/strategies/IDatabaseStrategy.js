@@ -1,4 +1,4 @@
-class IDatabaseStrategy {
+export class IDatabaseStrategy {
   async readStockItem(id) {
     throw new Error("readStockItem method not implemented");
   }
@@ -7,5 +7,3 @@ class IDatabaseStrategy {
     throw new Error("updateStockItem method not implemented");
   }
 }
-
-module.exports = { IDatabaseStrategy };

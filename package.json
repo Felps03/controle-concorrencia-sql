@@ -3,20 +3,22 @@
   "version": "1.0.0",
   "description": "Demonstracao de Controle de Concorrencia Otimista (CCO) em atualizacoes de estoque com Node.js, PostgreSQL, Prisma e pg, usando os padroes Strategy, Factory, Decorator e Repository.",
   "main": "index.js",
+  "type": "module",
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
-    "pretest": "npx prisma migrate deploy",
-    "pretest:integration": "npx prisma migrate deploy",
+    "postinstall": "npx prisma generate",
+    "pretest": "npx prisma migrate deploy && npx prisma generate",
+    "pretest:integration": "npx prisma migrate deploy && npx prisma generate",
     "test": "node --env-file-if-exists=.env --test \"test/**/*.test.js\"",
     "test:unit": "node --test \"test/unit/**/*.test.js\"",
     "test:integration": "node --env-file-if-exists=.env --test \"test/integration/**/*.test.js\"",
-    "prestart": "npx prisma migrate deploy",
+    "prestart": "npx prisma migrate deploy && npx prisma generate",
     "start": "node --env-file-if-exists=.env index.js",
-    "predev": "npx prisma migrate deploy",
+    "predev": "npx prisma migrate deploy && npx prisma generate",
     "dev": "node --env-file-if-exists=.env --watch index.js",
-    "preseed:prisma": "npx prisma migrate deploy",
+    "preseed:prisma": "npx prisma migrate deploy && npx prisma generate",
     "seed:prisma": "node --env-file-if-exists=.env prisma/seed.js",
     "prisma:migrate:dev": "npx prisma migrate dev",
     "prisma:format": "npx prisma format",
@@ -36,7 +38,8 @@
   "author": "Felps03",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "pg": "^8.22.0"
   },
   "devDependencies": {
@@ -44,6 +47,6 @@
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.4",
-    "prisma": "^5.22.0"
+    "prisma": "^7.8.0"
   }
 }

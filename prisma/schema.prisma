@@ -5,12 +5,14 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
+// A partir do Prisma 7, a connection URL para o Migrate vem do
+// prisma.config.js (datasource.url), nao mais deste bloco.
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model stock {

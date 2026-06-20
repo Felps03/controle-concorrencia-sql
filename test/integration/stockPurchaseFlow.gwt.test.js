@@ -1,21 +1,20 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const crypto = require("node:crypto");
+import test from "node:test";
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
 
-const { PrismaClient } = require("@prisma/client");
-const { PoolStrategy } = require("../../src/strategies/PoolStrategy");
-const { PrismaStrategy } = require("../../src/strategies/PrismaStrategy");
-const StockItemRepository = require("../../src/repositories/StockItemRepository");
-const LoggingRepositoryDecorator = require("../../src/decorators/LoggingRepositoryDecorator");
-const { updateStockItemConcurrently } = require("../../src/services/stockItemService");
-const InsufficientStockError = require("../../src/errors/InsufficientStockError");
-const VersionConflictError = require("../../src/errors/VersionConflictError");
-const poolClient = require("../../src/database/pool/poolClient");
+import prisma from "../../src/database/prisma/prismaClient.js";
+import { PoolStrategy } from "../../src/strategies/PoolStrategy.js";
+import { PrismaStrategy } from "../../src/strategies/PrismaStrategy.js";
+import StockItemRepository from "../../src/repositories/StockItemRepository.js";
+import LoggingRepositoryDecorator from "../../src/decorators/LoggingRepositoryDecorator.js";
+import { updateStockItemConcurrently } from "../../src/services/stockItemService.js";
+import InsufficientStockError from "../../src/errors/InsufficientStockError.js";
+import VersionConflictError from "../../src/errors/VersionConflictError.js";
+import poolClient from "../../src/database/pool/poolClient.js";
 
 // Testes de integracao do fluxo de compra (stockItemService) contra um
 // Postgres real, escritos no estilo Dado/Quando/Entao (Given/When/Then).
 // Requer DATABASE_URL com as migrations aplicadas (ver README).
-const prisma = new PrismaClient();
 const createdIds = [];
 
 const seedStock = async (amount, version = 0) => {

@@ -6,4 +6,4 @@ class InsufficientStockError extends Error {
   }
 }
 
-module.exports = InsufficientStockError;
+export default InsufficientStockError;

@@ -1,9 +1,9 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
+import test from "node:test";
+import assert from "node:assert/strict";
 
-const { updateStockItemConcurrently } = require("../../src/services/stockItemService");
-const InsufficientStockError = require("../../src/errors/InsufficientStockError");
-const VersionConflictError = require("../../src/errors/VersionConflictError");
+import { updateStockItemConcurrently } from "../../src/services/stockItemService.js";
+import InsufficientStockError from "../../src/errors/InsufficientStockError.js";
+import VersionConflictError from "../../src/errors/VersionConflictError.js";
 
 const id = "fake-id";
 

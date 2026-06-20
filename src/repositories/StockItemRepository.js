@@ -12,4 +12,4 @@ class StockItemRepository {
   }
 }
 
-module.exports = StockItemRepository;
+export default StockItemRepository;

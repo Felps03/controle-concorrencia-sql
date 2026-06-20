@@ -11,7 +11,7 @@ O padrão Singleton foi utilizado para garantir que apenas uma instância de con
 ```javascript
 // database/pool/poolClient.js
 
-const { Pool } = require("pg");
+import { Pool } from "pg";
 
 class PoolSingleton {
   constructor() {
@@ -24,7 +24,7 @@ class PoolSingleton {
   }
 }
 
-module.exports = new PoolSingleton();
+export default new PoolSingleton();
 ```
 
 ## Strategy
@@ -35,6 +35,9 @@ O padrão Strategy foi aplicado para permitir a troca dinâmica das estratégias
 ### Exemplo de Código
 ```javascript
 // Factory.js
+
+import { PoolStrategy } from "./strategies/PoolStrategy.js";
+import { PrismaStrategy } from "./strategies/PrismaStrategy.js";
 
 class DatabaseStrategyFactory {
   static strategies = {
@@ -50,6 +53,8 @@ class DatabaseStrategyFactory {
     return new Strategy();
   }
 }
+
+export default DatabaseStrategyFactory;
 ```
 
 ## Factory
@@ -60,6 +65,8 @@ Utilizamos o padrão Factory para encapsular a lógica de criação das estraté
 ### Exemplo de Código
 ```javascript
 // index.js
+
+import DatabaseStrategyFactory from "./src/Factory.js";
 
 const databaseStrategy = DatabaseStrategyFactory.create(strategyType);
 ```
@@ -72,6 +79,8 @@ O padrão Decorator foi empregado para adicionar funcionalidades extras, como lo
 ### Exemplo de Código
 ```javascript
 // decorators/LoggingRepositoryDecorator.js
+
+import logger from "../logger.js";
 
 class LoggingRepositoryDecorator {
   constructor(repository) {
@@ -92,6 +101,8 @@ class LoggingRepositoryDecorator {
     return success;
   }
 }
+
+export default LoggingRepositoryDecorator;
 ```
 
 ## Repository
@@ -112,6 +123,8 @@ class StockItemRepository {
     return this.databaseStrategy.readStockItem(id);
   }
 }
+
+export default StockItemRepository;
 ```
 
 ## Conclusão

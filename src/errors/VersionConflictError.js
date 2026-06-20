@@ -7,4 +7,4 @@ class VersionConflictError extends Error {
   }
 }
 
-module.exports = VersionConflictError;
+export default VersionConflictError;
