@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const DatabaseStrategyFactory = require("./src/Factory");
 const StockItemRepository = require('./src/repositories/StockItemRepository');
 const LoggingRepositoryDecorator = require('./src/decorators/LoggingRepositoryDecorator');

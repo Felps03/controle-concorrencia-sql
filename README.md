@@ -76,7 +76,9 @@ Mais detalhes sobre os padrões de design usados: `[DesignPatternsGuide_DataAcce
 
 ## Setup Local
 
-Pré-requisitos: Node.js 18+, Docker (para o Postgres).
+Pré-requisitos: Node.js 24 LTS (ver [`.nvmrc`](.nvmrc) — `nvm use`), Docker (para o Postgres).
+
+> O projeto usa quase só recursos nativos do Node: o test runner é o `node:test`, e as variáveis de ambiente são carregadas via flag nativa `--env-file-if-exists` (sem o pacote `dotenv`). As únicas dependências de runtime são `pg` e `@prisma/client` — não há driver Postgres nativo no Node, e o Prisma é uma das duas strategies comparadas pelo projeto.
 
 ```bash
 npm install

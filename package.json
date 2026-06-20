@@ -4,14 +4,15 @@
   "description": "Demonstracao de Controle de Concorrencia Otimista (CCO) em atualizacoes de estoque com Node.js, PostgreSQL, Prisma e pg, usando os padroes Strategy, Factory, Decorator e Repository.",
   "main": "index.js",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
-    "test": "node --test test/unit test/integration",
-    "test:unit": "node --test test/unit",
-    "test:integration": "node --test test/integration",
-    "start": "node index",
-    "seed:prisma": "node prisma/seed.js",
+    "test": "node --env-file-if-exists=.env --test \"test/**/*.test.js\"",
+    "test:unit": "node --test \"test/unit/**/*.test.js\"",
+    "test:integration": "node --env-file-if-exists=.env --test \"test/integration/**/*.test.js\"",
+    "start": "node --env-file-if-exists=.env index.js",
+    "dev": "node --env-file-if-exists=.env --watch index.js",
+    "seed:prisma": "node --env-file-if-exists=.env prisma/seed.js",
     "prisma:migrate:dev": "npx prisma migrate dev",
     "prisma:format": "npx prisma format",
     "prisma:introspect": "npx prisma introspect",
@@ -31,9 +32,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.11.0",
-    "dotenv": "^16.4.5",
-    "pg": "^8.11.3",
-    "pino": "^10.3.1"
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
