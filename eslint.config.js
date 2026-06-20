@@ -18,6 +18,7 @@ module.exports = [
         process: "readonly",
         console: "readonly",
         __dirname: "readonly",
+        setTimeout: "readonly",
       },
     },
   },

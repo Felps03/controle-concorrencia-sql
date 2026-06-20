@@ -1,16 +1,33 @@
-const updateStockItemConcurrently = async (id, decoratedRepository) => {
-  try {
+const InsufficientStockError = require("../errors/InsufficientStockError");
+const VersionConflictError = require("../errors/VersionConflictError");
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Em CCO, um retorno `false` do update significa que a version mudou entre a
+// leitura e a escrita (outra compra venceu a corrida) — não é um erro, é o
+// mecanismo de detecção de conflito funcionando. Por isso vale tentar de novo.
+const updateStockItemConcurrently = async (
+  id,
+  decoratedRepository,
+  { retries = 3, backoffMs = 10 } = {}
+) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
     const stockItem = await decoratedRepository.findStockItemById(id);
     if (!stockItem || stockItem.amount <= 0) {
-      throw new Error("Estoque insuficiente.");
+      throw new InsufficientStockError(id);
     }
-    await decoratedRepository.updateStockItem(id, stockItem.version);
-  } catch (error) {
-    console.error(
-      `Erro ao atualizar o estoque para o item ${id}:`,
-      error.message
-    );
+
+    const success = await decoratedRepository.updateStockItem(id, stockItem.version);
+    if (success) {
+      return { id, attempt, status: "success" };
+    }
+
+    if (attempt < retries) {
+      await wait(backoffMs * attempt + Math.random() * backoffMs);
+    }
   }
+
+  throw new VersionConflictError(id, retries);
 };
 
 module.exports = { updateStockItemConcurrently };

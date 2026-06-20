@@ -7,7 +7,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test test/unit test/integration",
+    "test:unit": "node --test test/unit",
+    "test:integration": "node --test test/integration",
     "start": "node index",
     "seed:prisma": "node prisma/seed.js",
     "prisma:migrate:dev": "npx prisma migrate dev",

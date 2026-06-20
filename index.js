@@ -17,16 +17,19 @@ const decoratedRepository  = new LoggingRepositoryDecorator(stockItemRepository)
 const main = async () => {
     const id = "f92ef45b-a729-4938-b580-03d939a80301";
 
-    try {
+    const results = await Promise.allSettled(
+      Array.from({ length: 100 }, () => updateStockItemConcurrently(id, decoratedRepository))
+    );
 
-        await Promise.all(Array.from({ length: 100 }, () => updateStockItemConcurrently(id, decoratedRepository)));
-        const finalStockItem = await decoratedRepository.findStockItemById(id);
-        console.log("Resultado final do estoque:", finalStockItem);
+    const summary = results.reduce((acc, result) => {
+      const status = result.status === "fulfilled" ? "success" : result.reason.name;
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
 
-
-    } catch (error) {
-      console.error("Erro durante a execução do script:", error);
-    }
+    const finalStockItem = await decoratedRepository.findStockItemById(id);
+    console.log("Resumo das tentativas:", summary);
+    console.log("Resultado final do estoque:", finalStockItem);
   }
 
   main()
