@@ -17,11 +17,7 @@ class PoolSingleton {
   constructor() {
     if (!PoolSingleton.instance) {
       PoolSingleton.instance = new Pool({
-        user: "postgres",
-        host: "localhost",
-        database: "transactions",
-        password: "postgres",
-        port: 5432,
+        connectionString: process.env.DATABASE_URL,
       });
     }
     return PoolSingleton.instance;
@@ -41,15 +37,17 @@ O padrão Strategy foi aplicado para permitir a troca dinâmica das estratégias
 // Factory.js
 
 class DatabaseStrategyFactory {
+  static strategies = {
+    pool: PoolStrategy,
+    prisma: PrismaStrategy,
+  };
+
   static create(strategyType) {
-    switch (strategyType) {
-      case 'pool':
-        return new PoolStrategy();
-      case 'prisma':
-        return new PrismaStrategy();
-      default:
-        throw new Error('Invalid database strategy type');
+    const Strategy = this.strategies[strategyType];
+    if (!Strategy) {
+      throw new Error('Invalid database strategy type');
     }
+    return new Strategy();
   }
 }
 ```
@@ -81,8 +79,17 @@ class LoggingRepositoryDecorator {
   }
 
   async findStockItemById(id) {
-    console.log(`Buscando stockItem com id: ${id}`);
-    return this.repository.findStockItemById(id);
+    logger.debug({ id }, "Buscando stockItem");
+    const result = await this.repository.findStockItemById(id);
+    logger.debug({ id, result }, "Resultado da busca");
+    return result;
+  }
+
+  async updateStockItem(id, version) {
+    logger.debug({ id, version }, "Atualizando stockItem");
+    const success = await this.repository.updateStockItem(id, version);
+    logger.debug({ id, version, success }, "Resultado da atualizacao");
+    return success;
   }
 }
 ```
