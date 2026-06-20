@@ -5,6 +5,7 @@ const StockItemRepository = require('./src/repositories/StockItemRepository');
 const LoggingRepositoryDecorator = require('./src/decorators/LoggingRepositoryDecorator');
 
 const { updateStockItemConcurrently } = require('./src/services/stockItemService');
+const logger = require('./src/logger');
 
 
 const strategyType = process.env.DATABASE_STRATEGY || "pool";
@@ -15,7 +16,7 @@ const stockItemRepository = new StockItemRepository(databaseStrategy);
 const decoratedRepository  = new LoggingRepositoryDecorator(stockItemRepository);
 
 const main = async () => {
-    const id = "f92ef45b-a729-4938-b580-03d939a80301";
+    const id = process.env.STOCK_ITEM_ID || "f92ef45b-a729-4938-b580-03d939a80301";
 
     const results = await Promise.allSettled(
       Array.from({ length: 100 }, () => updateStockItemConcurrently(id, decoratedRepository))
@@ -28,12 +29,12 @@ const main = async () => {
     }, {});
 
     const finalStockItem = await decoratedRepository.findStockItemById(id);
-    console.log("Resumo das tentativas:", summary);
-    console.log("Resultado final do estoque:", finalStockItem);
+    logger.info({ summary }, "Resumo das tentativas");
+    logger.info({ finalStockItem }, "Resultado final do estoque");
   }
 
   main()
-    .catch(console.error)
+    .catch((error) => logger.error({ err: error }, "Erro durante a execucao do script"))
     .finally(() => {
       if (strategyType === "pool") {
         require("./src/database/pool/poolClient").end();

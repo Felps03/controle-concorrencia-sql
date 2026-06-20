@@ -1,6 +1,7 @@
-const poolClient  = require('../database/pool/poolClient'); // Supondo que 
+const poolClient  = require('../database/pool/poolClient'); // Supondo que
 
 const { IDatabaseStrategy } = require("./IDatabaseStrategy");
+const logger = require("../logger");
 
 class PoolStrategy extends IDatabaseStrategy {
 
@@ -10,7 +11,7 @@ class PoolStrategy extends IDatabaseStrategy {
       const res = await client.query(sql, params);
       return res.rows;
     } catch (e) {
-      console.error("Erro na operação de banco de dados:", e.message);
+      logger.error({ err: e }, "Erro na operacao de banco de dados");
       throw e;
     } finally {
       client.release();

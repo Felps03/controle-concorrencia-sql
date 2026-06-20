@@ -1,6 +1,7 @@
 const prisma = require('../database/prisma/prismaClient');
 
 const { IDatabaseStrategy } = require("./IDatabaseStrategy");
+const logger = require("../logger");
 
 class PrismaStrategy extends IDatabaseStrategy {
   async readStockItem(id) {
@@ -19,7 +20,7 @@ class PrismaStrategy extends IDatabaseStrategy {
       return true;
     } catch (error) {
       if (error.message.includes("Record to update not found")) {
-        console.log("Tentativa de compra ignorada devido a condição de corrida");
+        logger.debug({ id, version }, "Tentativa de compra ignorada devido a conflito de versao");
         return false;
       } else {
         throw error;
