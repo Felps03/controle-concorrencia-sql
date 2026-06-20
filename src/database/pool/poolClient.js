@@ -4,11 +4,7 @@ class PoolSingleton {
   constructor() {
     if (!PoolSingleton.instance) {
       PoolSingleton.instance = new Pool({
-        user: "postgres",
-        host: "localhost",
-        database: "transactions",
-        password: "postgres",
-        port: 5432,
+        connectionString: process.env.DATABASE_URL,
       });
     }
     return PoolSingleton.instance;

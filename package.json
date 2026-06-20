@@ -1,8 +1,11 @@
 {
-  "name": "estoque",
+  "name": "controle-concorrencia-sql",
   "version": "1.0.0",
-  "description": "",
+  "description": "Demonstracao de Controle de Concorrencia Otimista (CCO) em atualizacoes de estoque com Node.js, PostgreSQL, Prisma e pg, usando os padroes Strategy, Factory, Decorator e Repository.",
   "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index",
@@ -10,10 +13,19 @@
     "prisma:migrate:dev": "npx prisma migrate dev",
     "prisma:format": "npx prisma format",
     "prisma:introspect": "npx prisma introspect",
-    "prisma:studio": "npx prisma studio"
+    "prisma:studio": "npx prisma studio",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "optimistic-concurrency-control",
+    "postgresql",
+    "prisma",
+    "nodejs",
+    "design-patterns",
+    "estoque"
+  ],
+  "author": "Felps03",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.11.0",
@@ -21,6 +33,10 @@
     "pg": "^8.11.3"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.4",
     "prisma": "^5.11.0"
   }
 }

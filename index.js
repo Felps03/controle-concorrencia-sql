@@ -16,17 +16,23 @@ const decoratedRepository  = new LoggingRepositoryDecorator(stockItemRepository)
 
 const main = async () => {
     const id = "f92ef45b-a729-4938-b580-03d939a80301";
-  
+
     try {
 
         await Promise.all(Array.from({ length: 100 }, () => updateStockItemConcurrently(id, decoratedRepository)));
         const finalStockItem = await decoratedRepository.findStockItemById(id);
         console.log("Resultado final do estoque:", finalStockItem);
 
-      
+
     } catch (error) {
       console.error("Erro durante a execução do script:", error);
     }
   }
 
-  main().catch(console.error);
+  main()
+    .catch(console.error)
+    .finally(() => {
+      if (strategyType === "pool") {
+        require("./src/database/pool/poolClient").end();
+      }
+    });
